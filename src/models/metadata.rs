@@ -142,7 +142,7 @@ pub struct SigninEndpoint {
     #[serde(rename = "clickTrackingParams")]
     pub click_tracking_params: String,
     #[serde(rename = "webNavigationEndpointData")]
-    pub web_navigation_endpoint_data: WebNavigationEndpointData,
+    pub web_navigation_endpoint_data: Option<WebNavigationEndpointData>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
