@@ -6,7 +6,7 @@ use crate::models::Response;
 
 pub type SearchResponse = Response<SearchResult>;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SearchResult {
     pub kind: String,
     pub etag: String,
@@ -14,7 +14,7 @@ pub struct SearchResult {
     pub snippet: Snippet,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "kind")]
 pub enum Id {
     #[serde(rename = "youtube#video")]
@@ -34,7 +34,17 @@ pub enum Id {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl Id {
+    pub fn into_inner(self) -> String {
+        match self {
+            Id::VideoId { video_id } => video_id,
+            Id::ChannelId { channel_id } => channel_id,
+            Id::PlaylistId { playlist_id } => playlist_id,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Snippet {
     #[serde(rename = "publishedAt")]
     pub published_at: String,
@@ -49,7 +59,7 @@ pub struct Snippet {
     pub live_broadcast_content: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Thumbnail {
     pub url: String,
     pub width: u64,

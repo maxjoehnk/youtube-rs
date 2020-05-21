@@ -4,6 +4,7 @@ use crate::models::*;
 
 const SEARCH_URL: &str = "https://www.googleapis.com/youtube/v3/search";
 
+#[derive(Debug, Clone)]
 pub struct YoutubeApi {
     api_key: String,
     client: Client,

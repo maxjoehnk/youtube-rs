@@ -338,7 +338,7 @@ pub struct PlayerMicroformatRenderer {
     pub thumbnail: WatermarkClass,
     pub embed: Embed,
     pub title: Description,
-    pub description: Description,
+    pub description: Option<Description>,
     pub length_seconds: String,
     pub owner_profile_url: String,
     pub external_channel_id: String,
