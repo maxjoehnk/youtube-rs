@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
-use crate::models::Response;
+use crate::models::{Response, Snippet};
 
 pub type SearchResponse = Response<SearchResult>;
 
@@ -42,26 +40,4 @@ impl Id {
             Id::PlaylistId { playlist_id } => playlist_id,
         }
     }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Snippet {
-    #[serde(rename = "publishedAt")]
-    pub published_at: String,
-    #[serde(rename = "channelId")]
-    pub channel_id: String,
-    pub title: String,
-    pub description: String,
-    pub thumbnails: HashMap<String, Thumbnail>,
-    #[serde(rename = "channelTitle")]
-    pub channel_title: String,
-    #[serde(rename = "liveBroadcastContent")]
-    pub live_broadcast_content: String,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Thumbnail {
-    pub url: String,
-    pub width: u64,
-    pub height: u64,
 }

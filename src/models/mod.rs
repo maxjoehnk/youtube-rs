@@ -2,9 +2,13 @@ use serde::{Serialize, Deserialize};
 
 mod metadata;
 mod search;
+mod playlists;
+mod snippet;
 
 pub use self::metadata::*;
 pub use self::search::*;
+pub use self::playlists::*;
+pub use self::snippet::*;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
