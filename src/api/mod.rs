@@ -8,6 +8,7 @@ use crate::token::AuthToken;
 
 const SEARCH_URL: &str = "https://www.googleapis.com/youtube/v3/search";
 const LIST_PLAYLISTS_URL: &str = "https://www.googleapis.com/youtube/v3/playlists";
+const LIST_PLAYLIST_ITEMS_URL: &str = "https://www.googleapis.com/youtube/v3/playlistItems";
 
 #[derive(Debug, Clone)]
 pub(crate) struct YoutubeOAuth {
@@ -29,7 +30,7 @@ mod auth;
 impl YoutubeApi {
     pub async fn get_video_info(id: &str) -> Result<VideoMetadata, failure::Error> {
         let url = format!("https://www.youtube.com/get_video_info?video_id={}", id);
-        let res = get(&url).await?.text().await?;
+        let res = get(&url).await?.error_for_status()?.text().await?;
         let response: VideoMetadataResponse = serde_urlencoded::from_str(&res)?;
         let metadata: VideoMetadata = serde_json::from_str(&response.player_response)?;
 
@@ -61,6 +62,16 @@ impl YoutubeApi {
     pub async fn list_playlists(&self, request: ListPlaylistsRequestBuilder) -> Result<ListPlaylistsResponse, failure::Error> {
         let request = request.build();
         let response = self.api_get(LIST_PLAYLISTS_URL, request)
+            .await?
+            .json()
+            .await?;
+
+        Ok(response)
+    }
+
+    pub async fn list_playlist_items(&self, request: ListPlaylistItemsRequestBuilder) -> Result<ListPlaylistItemsResponse, failure::Error> {
+        let request = request.build();
+        let response = self.api_get(LIST_PLAYLIST_ITEMS_URL, request)
             .await?
             .json()
             .await?;

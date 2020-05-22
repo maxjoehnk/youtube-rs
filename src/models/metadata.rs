@@ -297,7 +297,7 @@ pub struct ButtonRenderer {
 #[serde(rename_all = "camelCase")]
 pub struct ButtonRendererNavigationEndpoint {
     pub click_tracking_params: String,
-    pub url_endpoint: UrlEndpoint,
+    pub url_endpoint: Option<UrlEndpoint>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

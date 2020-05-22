@@ -11,7 +11,7 @@ pub struct Snippet {
     pub description: String,
     pub thumbnails: HashMap<String, Thumbnail>,
     pub channel_title: String,
-    pub live_broadcast_content: String,
+    pub live_broadcast_content: Option<String>
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
