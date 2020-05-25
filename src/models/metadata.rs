@@ -209,7 +209,8 @@ pub struct EndscreenElementRenderer {
 pub enum EndcardStyle {
     Channel,
     Video,
-    Playlist
+    Playlist,
+    Website
 }
 
 #[derive(Debug, Clone, Deserialize)]
