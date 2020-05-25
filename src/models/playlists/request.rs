@@ -4,6 +4,8 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct ListPlaylistsRequestBuilder {
     pub channel_id: Option<String>,
+    #[serde(rename = "id")]
+    pub playlist_id: Option<String>,
     pub max_results: Option<u64>,
     pub mine: Option<bool>
 }
