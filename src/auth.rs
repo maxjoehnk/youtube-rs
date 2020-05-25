@@ -29,6 +29,7 @@ pub(crate) fn get_oauth_url(client: &BasicClient) -> (String, PkceCodeVerifier) 
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new(SCOPE.to_string()))
         .set_pkce_challenge(pkce_code_challenge)
+        .add_extra_param("access_type", "offline")
         .url();
 
     (authorize_url.to_string(), pkce_code_verifier)
