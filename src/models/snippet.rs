@@ -17,6 +17,6 @@ pub struct Snippet {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Thumbnail {
     pub url: String,
-    pub width: u64,
-    pub height: u64,
+    pub width: Option<u64>,
+    pub height: Option<u64>,
 }

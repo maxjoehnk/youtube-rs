@@ -28,7 +28,7 @@ pub struct VideoMetadata {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Annotation {
-    pub player_annotations_expanded_renderer: PlayerAnnotationsExpandedRenderer,
+    pub player_annotations_expanded_renderer: Option<PlayerAnnotationsExpandedRenderer>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
