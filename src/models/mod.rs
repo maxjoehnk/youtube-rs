@@ -1,10 +1,12 @@
 use serde::{Serialize, Deserialize};
 
+mod error;
 mod metadata;
 mod search;
 mod playlists;
 mod snippet;
 
+pub use self::error::*;
 pub use self::metadata::*;
 pub use self::search::*;
 pub use self::playlists::*;

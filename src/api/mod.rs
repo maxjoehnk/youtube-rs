@@ -5,10 +5,11 @@ use serde::Serialize;
 
 use crate::models::*;
 use crate::token::AuthToken;
+use serde::de::DeserializeOwned;
 
-const SEARCH_URL: &str = "https://www.googleapis.com/youtube/v3/search";
-const LIST_PLAYLISTS_URL: &str = "https://www.googleapis.com/youtube/v3/playlists";
-const LIST_PLAYLIST_ITEMS_URL: &str = "https://www.googleapis.com/youtube/v3/playlistItems";
+const SEARCH_URL: &str = "https://youtube.googleapis.com/youtube/v3/search";
+const LIST_PLAYLISTS_URL: &str = "https://youtube.googleapis.com/youtube/v3/playlists";
+const LIST_PLAYLIST_ITEMS_URL: &str = "https://youtube.googleapis.com/youtube/v3/playlistItems";
 
 #[derive(Debug, Clone)]
 pub(crate) struct YoutubeOAuth {
@@ -45,47 +46,37 @@ impl YoutubeApi {
         }
     }
 
-
     pub async fn search(&self, search_request: SearchRequestBuilder) -> Result<SearchResponse, failure::Error> {
         let request = search_request.build(&self.api_key);
         let response = self.client.get(SEARCH_URL)
             .query(&request)
             .send()
-            .await?
-            .error_for_status()?
-            .json()
             .await?;
 
-        Ok(response)
+        YoutubeApi::handle_error(response).await
     }
 
     pub async fn list_playlists(&self, request: ListPlaylistsRequestBuilder) -> Result<ListPlaylistsResponse, failure::Error> {
         let request = request.build();
-        let response = self.api_get(LIST_PLAYLISTS_URL, request)
-            .await?
-            .json()
-            .await?;
+        let response = self.api_get(LIST_PLAYLISTS_URL, request).await?;
 
         Ok(response)
     }
 
     pub async fn list_playlist_items(&self, request: ListPlaylistItemsRequestBuilder) -> Result<ListPlaylistItemsResponse, failure::Error> {
         let request = request.build();
-        let response = self.api_get(LIST_PLAYLIST_ITEMS_URL, request)
-            .await?
-            .json()
-            .await?;
+        let response = self.api_get(LIST_PLAYLIST_ITEMS_URL, request).await?;
 
         Ok(response)
     }
 
-    async fn api_get<S: Into<String>, T: Serialize>(
+    async fn api_get<S: Into<String>, T: Serialize, TResponse: DeserializeOwned>(
         &self,
         url: S,
         params: T,
-    ) -> Result<reqwest::Response, Error> {
+    ) -> Result<TResponse, Error> {
         let req = self.client.get(&url.into()).query(&params);
-        if let Some(oauth) = self.oauth.as_ref() {
+        let res = if let Some(oauth) = self.oauth.as_ref() {
             if oauth.token.requires_new_token().await {
                 oauth.token.refresh(&oauth.client).await?;
             }
@@ -96,16 +87,14 @@ impl YoutubeApi {
                 .send()
                 .await?
                 .error_for_status();
-            if let Err(err) = res {
-                self.retry_request(req, err, oauth).await
-            } else {
-                let res = res.unwrap();
-                Ok(res)
+            match res {
+                Ok(res) => Ok(res),
+                Err(err) => self.retry_request(req, err, oauth).await
             }
         } else {
-            let res = req.send().await?.error_for_status()?;
-            Ok(res)
-        }
+            Ok(req.send().await?)
+        }?;
+        YoutubeApi::handle_error(res).await
     }
 
     async fn retry_request(
@@ -124,6 +113,20 @@ impl YoutubeApi {
             Ok(res)
         } else {
             Err(err.into())
+        }
+    }
+
+    async fn handle_error<TResponse>(response: reqwest::Response) -> Result<TResponse, Error>
+        where TResponse : DeserializeOwned
+    {
+        if response.error_for_status_ref().is_ok() {
+            let res = response.json().await?;
+            Ok(res)
+        } else {
+            let err: GoogleErrorResponse = response.json().await?;
+            log::error!("{:?}", err);
+
+            Err(err.error.into())
         }
     }
 }

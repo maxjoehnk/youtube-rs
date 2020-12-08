@@ -47,7 +47,7 @@ impl YoutubeApi {
      *
      * # Example
      * ```rust,no_run
-     * use youtube::{YoutubeApi, auth::stdio_login};
+     * use youtube_api::{YoutubeApi, auth::stdio_login};
      *
      * #[tokio::main]
      * async fn main() {

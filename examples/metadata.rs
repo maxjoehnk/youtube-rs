@@ -1,4 +1,4 @@
-use youtube::{YoutubeApi};
+use youtube_api::{YoutubeApi};
 
 #[tokio::main]
 pub async fn main() {
