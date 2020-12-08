@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install youtube-dl
+        run: sudo apt install youtube-dl
       - name: Run Tests
         uses: actions-rs/cargo@v1
         with:
