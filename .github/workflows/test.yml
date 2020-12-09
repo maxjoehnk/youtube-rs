@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install youtube-dl
-        run: sudo apt install youtube-dl
+        run: sudo -H pip install --upgrade youtube-dl
       - name: Run Tests
         uses: actions-rs/cargo@v1
         with:
