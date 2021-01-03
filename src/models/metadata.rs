@@ -260,7 +260,7 @@ pub struct AccessibilityData {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Message {
-    pub mealbar_promo_renderer: MealbarPromoRenderer,
+    pub mealbar_promo_renderer: Option<MealbarPromoRenderer>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
