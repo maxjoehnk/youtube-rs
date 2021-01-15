@@ -7,7 +7,7 @@ use failure::{format_err, Error};
 use log::debug;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::reqwest::async_http_client;
-use oauth2::{AsyncRefreshTokenRequest, TokenResponse};
+use oauth2::TokenResponse;
 
 #[derive(Debug, Clone)]
 pub(crate) struct AuthToken {

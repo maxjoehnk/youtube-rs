@@ -4,7 +4,7 @@ use failure::Error;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::reqwest::async_http_client;
 use oauth2::{
-    AsyncCodeTokenRequest, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope,
+    AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope,
 };
 
 static SCOPE: &str = "https://www.googleapis.com/auth/youtube.readonly";
