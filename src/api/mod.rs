@@ -10,6 +10,7 @@ use serde::de::DeserializeOwned;
 const SEARCH_URL: &str = "https://youtube.googleapis.com/youtube/v3/search";
 const LIST_PLAYLISTS_URL: &str = "https://youtube.googleapis.com/youtube/v3/playlists";
 const LIST_PLAYLIST_ITEMS_URL: &str = "https://youtube.googleapis.com/youtube/v3/playlistItems";
+const LIVE_BROADCASTS: &str = "https://youtube.googleapis.com/youtube/v3/liveBroadcasts";
 
 #[derive(Debug, Clone)]
 pub(crate) struct YoutubeOAuth {
@@ -57,16 +58,24 @@ impl YoutubeApi {
     }
 
     pub async fn list_playlists(&self, request: ListPlaylistsRequestBuilder) -> Result<ListPlaylistsResponse, failure::Error> {
-        let request = request.build();
+        let request = request.build(&self.api_key);
         let response = self.api_get(LIST_PLAYLISTS_URL, request).await?;
 
         Ok(response)
     }
 
     pub async fn list_playlist_items(&self, request: ListPlaylistItemsRequestBuilder) -> Result<ListPlaylistItemsResponse, failure::Error> {
-        let request = request.build();
+        let request = request.build(&self.api_key);
         let response = self.api_get(LIST_PLAYLIST_ITEMS_URL, request).await?;
 
+        Ok(response)
+    }
+
+    pub async fn list_live_broadcasts(&self, request: LiveBroadcastRequestBuilder) 
+        -> Result<ListLiveBroadcastResponse, failure::Error> {
+        let request = request.build(&self.api_key);
+        let response = self.api_get(LIVE_BROADCASTS, request)
+            .await?;
         Ok(response)
     }
 

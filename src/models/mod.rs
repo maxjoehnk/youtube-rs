@@ -4,12 +4,14 @@ mod error;
 mod metadata;
 mod search;
 mod playlists;
+mod livebroadcasts;
 mod snippet;
 
 pub use self::error::*;
 pub use self::metadata::*;
 pub use self::search::*;
 pub use self::playlists::*;
+pub use self::livebroadcasts::*;
 pub use self::snippet::*;
 
 #[derive(Debug, Serialize, Deserialize)]
