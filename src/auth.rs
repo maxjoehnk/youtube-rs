@@ -7,7 +7,11 @@ use oauth2::{
     AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope,
 };
 
-static SCOPE: &str = "https://www.googleapis.com/auth/youtube.readonly";
+static SCOPE1: &str = "https://www.googleapis.com/auth/youtube.readonly";
+#[cfg(feature = "post")]
+static SCOPE2: &str = "https://www.googleapis.com/auth/youtube.force-ssl";
+#[cfg(not(feature = "post"))]
+static SCOPE2: &str = "";
 
 /**
  * Prints the authorize url to stdout and waits for the authorization code from stdin
@@ -27,11 +31,11 @@ pub(crate) fn get_oauth_url(client: &BasicClient) -> (String, PkceCodeVerifier) 
 
     let (authorize_url, _) = client
         .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new(SCOPE.to_string()))
+        .add_scope(Scope::new(SCOPE1.to_string()))
+        .add_scope(Scope::new(SCOPE2.to_string()))
         .set_pkce_challenge(pkce_code_challenge)
         .add_extra_param("access_type", "offline")
         .url();
-
     (authorize_url.to_string(), pkce_code_verifier)
 }
 
