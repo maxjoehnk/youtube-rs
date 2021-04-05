@@ -21,7 +21,7 @@ impl YoutubeApi {
                 "https://www.googleapis.com/oauth2/v3/token".to_string(),
             )?),
         )
-            .set_redirect_url(RedirectUrl::new(
+            .set_redirect_uri(RedirectUrl::new(
                 redirect_uri.unwrap_or(CODE_REDIRECT_URI).to_string(),
             )?);
 
