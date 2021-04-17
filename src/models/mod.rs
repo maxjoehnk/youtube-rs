@@ -4,12 +4,14 @@ mod error;
 mod metadata;
 mod search;
 mod playlists;
+mod livebroadcasts;
 mod snippet;
 
 pub use self::error::*;
 pub use self::metadata::*;
 pub use self::search::*;
 pub use self::playlists::*;
+pub use self::livebroadcasts::*;
 pub use self::snippet::*;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,6 +51,11 @@ pub enum Id {
         #[serde(rename = "playlistId")]
         playlist_id: String
     },
+    #[serde(rename = "youtube#liveChatMessage")]
+    LiveChatId {
+        #[serde(rename = "id")]
+        livechat_id: String
+    }
 }
 
 impl Id {
@@ -57,6 +64,7 @@ impl Id {
             Id::VideoId { video_id } => video_id,
             Id::ChannelId { channel_id } => channel_id,
             Id::PlaylistId { playlist_id } => playlist_id,
+            Id::LiveChatId { livechat_id } => livechat_id
         }
     }
 }
