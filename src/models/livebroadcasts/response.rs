@@ -52,7 +52,27 @@ pub struct LiveChatSnippet {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthorDetails {
-    pub display_name: String
+    #[serde(flatten)]
+    pub author_details_id: AuthorDetailsId,
+    pub is_chat_moderator: bool,
+    pub is_chat_owner: bool,    
+}
+
+///
+/// AuthorDetailsId contains just the display name and
+/// the channel ID in a hashable structure.
+/// This makes it easy to store a hash that uniquely identifies
+/// a person based on their current display name. This means
+/// that an application doesn't track display name changes.
+/// If an application wants to track display name changes then 
+/// use just the channel ID
+/// (and deal with any privacy concerns associated)
+///
+#[derive(Clone, Debug, Serialize, Deserialize, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct AuthorDetailsId {
+    pub display_name: String,
+    pub channel_id: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
