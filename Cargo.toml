@@ -6,7 +6,7 @@ authors = ["Max Jöhnk <maxjoehnk@gmail.com>"]
 keywords = ["youtube", "api", "client", "youtube-dl"]
 repository = "https://github.com/maxjoehnk/youtube-rs"
 description = "Async Youtube API implementation in Rust"
-edition = "2018"
+edition = "2021"
 categories = ["api-bindings", "multimedia::video"]
 
 [badges]
