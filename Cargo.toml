@@ -12,6 +12,11 @@ categories = ["api-bindings", "multimedia::video"]
 [badges]
 travis-ci = { repository = "maxjoehnk/youtube-rs", branch = "master" }
 
+[features]
+default = ["readonly"]
+post = ["readonly"]
+readonly = []
+
 [dependencies]
 failure = "0.1"
 serde = { version = "1", features = ["derive"] }
