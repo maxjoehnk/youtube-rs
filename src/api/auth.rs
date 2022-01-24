@@ -44,24 +44,22 @@ impl YoutubeApi {
         })
     }
 
-    /**
-     * Perform an OAuth Login
-     *
-     * Available handlers:
-     * * [auth::stdio_login](auth/fn.stdio_login.html)
-     *
-     * # Example
-     * ```rust,no_run
-     * use youtube_api::{YoutubeApi, auth::stdio_login};
-     *
-     * #[tokio::main]
-     * async fn main() {
-     *   let api = YoutubeApi::new_with_oauth("", String::new(), String::new(), None).unwrap();
-     *
-     *   api.login(stdio_login).await.unwrap();
-     * }
-     * ```
-     */
+    /// Perform an OAuth Login
+    ///
+    /// Available handlers:
+    /// * [auth::stdio_login](auth/fn.stdio_login.html)
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// use youtube_api::{YoutubeApi, auth::stdio_login};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///   let api = YoutubeApi::new_with_oauth("", String::new(), String::new(), None).unwrap();
+    ///
+    ///   api.login(stdio_login).await.unwrap();
+    /// }
+    /// ```
     pub async fn login<H>(&self, handler: H) -> anyhow::Result<()>
     where
         H: Fn(String) -> String,
@@ -96,9 +94,7 @@ impl YoutubeApi {
             .unwrap_or_default()
     }
 
-    /**
-     * Stores the auth and refresh token in a `.google-auth.json` file for login without user input.
-     */
+    /// Stores the auth and refresh token in a `.google-auth.json` file for login without user input.
     pub async fn store_token(&self) -> anyhow::Result<()> {
         let oauth = self.oauth.as_ref().context("OAuth client not configured")?;
         anyhow::ensure!(oauth.token.has_token(), "No token available to persist");
@@ -107,9 +103,7 @@ impl YoutubeApi {
         Ok(())
     }
 
-    /**
-     * Stores the auth and refresh token from a `.google-auth.json` file for login without user input.
-     */
+    /// Stores the auth and refresh token from a `.google-auth.json` file for login without user input.
     pub async fn load_token(&self) -> anyhow::Result<()> {
         let oauth = self.oauth.as_ref().context("OAuth client not configured")?;
         let token = read_to_string(".youtube-auth.json").await?;

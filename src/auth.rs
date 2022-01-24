@@ -5,9 +5,7 @@ use std::io;
 
 static SCOPE: &str = "https://www.googleapis.com/auth/youtube.readonly";
 
-/**
- * Prints the authorize url to stdout and waits for the authorization code from stdin
- */
+/// Prints the authorize url to stdout and waits for the authorization code from stdin
 pub fn stdio_login(url: String) -> String {
     println!("Open this URL in your browser:\n{}\n", url);
 
