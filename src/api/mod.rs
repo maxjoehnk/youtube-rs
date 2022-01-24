@@ -1,6 +1,5 @@
-use failure::Error;
 use oauth2::basic::BasicClient;
-use reqwest::{Client, get, RequestBuilder, StatusCode};
+use reqwest::{get, Client, RequestBuilder, StatusCode};
 use serde::Serialize;
 
 use crate::models::*;
@@ -29,7 +28,7 @@ pub struct YoutubeApi {
 mod auth;
 
 impl YoutubeApi {
-    pub async fn get_video_info(id: &str) -> Result<VideoMetadata, failure::Error> {
+    pub async fn get_video_info(id: &str) -> anyhow::Result<VideoMetadata> {
         let url = format!("https://www.youtube.com/get_video_info?video_id={}", id);
         let res = get(&url).await?.error_for_status()?.text().await?;
         let response: VideoMetadataResponse = serde_urlencoded::from_str(&res)?;
@@ -46,24 +45,30 @@ impl YoutubeApi {
         }
     }
 
-    pub async fn search(&self, search_request: SearchRequestBuilder) -> Result<SearchResponse, failure::Error> {
+    pub async fn search(
+        &self,
+        search_request: SearchRequestBuilder,
+    ) -> anyhow::Result<SearchResponse> {
         let request = search_request.build(&self.api_key);
-        let response = self.client.get(SEARCH_URL)
-            .query(&request)
-            .send()
-            .await?;
+        let response = self.client.get(SEARCH_URL).query(&request).send().await?;
 
         YoutubeApi::handle_error(response).await
     }
 
-    pub async fn list_playlists(&self, request: ListPlaylistsRequestBuilder) -> Result<ListPlaylistsResponse, failure::Error> {
+    pub async fn list_playlists(
+        &self,
+        request: ListPlaylistsRequestBuilder,
+    ) -> anyhow::Result<ListPlaylistsResponse> {
         let request = request.build();
         let response = self.api_get(LIST_PLAYLISTS_URL, request).await?;
 
         Ok(response)
     }
 
-    pub async fn list_playlist_items(&self, request: ListPlaylistItemsRequestBuilder) -> Result<ListPlaylistItemsResponse, failure::Error> {
+    pub async fn list_playlist_items(
+        &self,
+        request: ListPlaylistItemsRequestBuilder,
+    ) -> anyhow::Result<ListPlaylistItemsResponse> {
         let request = request.build();
         let response = self.api_get(LIST_PLAYLIST_ITEMS_URL, request).await?;
 
@@ -74,7 +79,7 @@ impl YoutubeApi {
         &self,
         url: S,
         params: T,
-    ) -> Result<TResponse, Error> {
+    ) -> anyhow::Result<TResponse> {
         let req = self.client.get(&url.into()).query(&params);
         let res = if let Some(oauth) = self.oauth.as_ref() {
             if oauth.token.requires_new_token().await {
@@ -89,7 +94,7 @@ impl YoutubeApi {
                 .error_for_status();
             match res {
                 Ok(res) => Ok(res),
-                Err(err) => self.retry_request(req, err, oauth).await
+                Err(err) => self.retry_request(req, err, oauth).await,
             }
         } else {
             Ok(req.send().await?)
@@ -102,7 +107,7 @@ impl YoutubeApi {
         req: RequestBuilder,
         err: reqwest::Error,
         oauth: &YoutubeOAuth,
-    ) -> Result<reqwest::Response, Error> {
+    ) -> anyhow::Result<reqwest::Response> {
         if let Some(StatusCode::UNAUTHORIZED) = err.status() {
             oauth.token.refresh(&oauth.client).await?;
             let res = req
@@ -116,8 +121,9 @@ impl YoutubeApi {
         }
     }
 
-    async fn handle_error<TResponse>(response: reqwest::Response) -> Result<TResponse, Error>
-        where TResponse : DeserializeOwned
+    async fn handle_error<TResponse>(response: reqwest::Response) -> anyhow::Result<TResponse>
+    where
+        TResponse: DeserializeOwned,
     {
         if response.error_for_status_ref().is_ok() {
             let res = response.json().await?;
@@ -149,7 +155,7 @@ mod test {
             "uM7JjfHDuFM",
             "BgWpK28dt6I",
             "8xe6nLVXEC0",
-            "O3WKbJLai1g"
+            "O3WKbJLai1g",
         ];
         for video_id in video_ids {
             let metadata = YoutubeApi::get_video_info(video_id).await;
