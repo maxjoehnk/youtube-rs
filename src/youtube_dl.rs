@@ -1,16 +1,21 @@
 use tokio::process::Command;
-use failure::format_err;
 
 #[derive(Debug, Clone, Default)]
 pub struct YoutubeDl;
 
 impl YoutubeDl {
-    pub async fn get_audio_stream_url(&self, id: &str) -> Result<String, failure::Error> {
-        let output = Command::new("youtube-dl").arg("-g").arg("-f").arg("bestaudio").arg(format!("https://www.youtube.com/watch?v={}", id)).output().await?;
+    pub async fn get_audio_stream_url(&self, id: &str) -> anyhow::Result<String> {
+        let output = Command::new("youtube-dl")
+            .arg("-g")
+            .arg("-f")
+            .arg("bestaudio")
+            .arg(format!("https://www.youtube.com/watch?v={}", id))
+            .output()
+            .await?;
 
         if !output.status.success() {
             let err = String::from_utf8(output.stderr)?;
-            return Err(format_err!("{}", err));
+            anyhow::bail!("{}", err);
         }
         let url = String::from_utf8(output.stdout)?.trim().to_owned();
         Ok(url)
@@ -31,7 +36,7 @@ mod test {
             "uM7JjfHDuFM",
             "BgWpK28dt6I",
             "8xe6nLVXEC0",
-            "O3WKbJLai1g"
+            "O3WKbJLai1g",
         ];
         for video_id in video_ids {
             let url = youtube_dl.get_audio_stream_url(video_id).await;

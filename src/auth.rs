@@ -1,11 +1,7 @@
-use std::io;
-
-use failure::Error;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::reqwest::async_http_client;
-use oauth2::{
-    AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope,
-};
+use oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, Scope};
+use std::io;
 
 static SCOPE: &str = "https://www.googleapis.com/auth/youtube.readonly";
 
@@ -39,7 +35,7 @@ pub(crate) async fn request_token(
     client: &BasicClient,
     code: String,
     verifier: PkceCodeVerifier,
-) -> Result<BasicTokenResponse, Error> {
+) -> anyhow::Result<BasicTokenResponse> {
     let code = AuthorizationCode::new(code);
 
     let token = client
@@ -54,7 +50,7 @@ pub(crate) async fn request_token(
 pub(crate) async fn perform_oauth<H>(
     client: &BasicClient,
     handler: H,
-) -> Result<BasicTokenResponse, Error>
+) -> anyhow::Result<BasicTokenResponse>
 where
     H: Fn(String) -> String,
 {

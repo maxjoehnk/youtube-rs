@@ -1,9 +1,9 @@
+use anyhow::Context;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
 
-use failure::{format_err, Error};
 use log::debug;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::reqwest::async_http_client;
@@ -36,13 +36,13 @@ impl AuthToken {
         self.has_token.store(true, Ordering::Relaxed);
     }
 
-    pub(crate) async fn get_token(&self) -> Result<BasicTokenResponse, Error> {
+    pub(crate) async fn get_token(&self) -> anyhow::Result<BasicTokenResponse> {
         Ok(self
             .token
             .lock()
             .await
             .as_ref()
-            .ok_or_else(|| format_err!("Not logged in"))?
+            .context("Not logged in")?
             .clone())
     }
 
@@ -50,15 +50,15 @@ impl AuthToken {
         self.has_token.load(Ordering::Relaxed)
     }
 
-    pub(crate) async fn refresh(&self, client: &BasicClient) -> Result<(), Error> {
+    pub(crate) async fn refresh(&self, client: &BasicClient) -> anyhow::Result<()> {
         debug!("refreshing access token");
         let token = {
             let token = self.token.lock().await;
             let refresh_token = token
                 .as_ref()
-                .ok_or_else(|| format_err!("Not logged in"))?
+                .context("Not logged in")?
                 .refresh_token()
-                .ok_or_else(|| format_err!("No refresh token"))?;
+                .context("No refresh token")?;
 
             client
                 .exchange_refresh_token(refresh_token)
@@ -84,11 +84,11 @@ impl AuthToken {
         }
     }
 
-    pub(crate) async fn get_auth_header(&self) -> Result<String, Error> {
+    pub(crate) async fn get_auth_header(&self) -> anyhow::Result<String> {
         let token = self.token.lock().await;
         let token = token
             .as_ref()
-            .ok_or_else(|| format_err!("Not logged in"))?
+            .context("Not logged in")?
             .access_token()
             .secret();
         Ok(token.clone())
