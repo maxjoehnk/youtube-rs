@@ -1,4 +1,3 @@
-use failure::{ensure, Error, format_err};
 use oauth2::basic::BasicClient;
 use oauth2::{PkceCodeVerifier, TokenUrl, RedirectUrl, ClientId, AuthUrl, ClientSecret};
 use tokio::fs::{read_to_string, write};
@@ -8,11 +7,12 @@ use crate::YoutubeApi;
 use crate::token::AuthToken;
 use crate::api::YoutubeOAuth;
 use reqwest::Client;
+use crate::error::YoutubeError;
 
 pub static CODE_REDIRECT_URI: &str = "urn:ietf:wg:oauth:2.0:oob";
 
 impl YoutubeApi {
-    pub fn new_with_oauth<S: Into<String>>(api_key: S, client_id: String, client_secret: String, redirect_uri: Option<&str>) -> Result<Self, failure::Error> {
+    pub fn new_with_oauth<S: Into<String>>(api_key: S, client_id: String, client_secret: String, redirect_uri: Option<&str>) -> crate::Result<Self> {
         let oauth_client = BasicClient::new(
             ClientId::new(client_id.clone()),
             Some(ClientSecret::new(client_secret.clone())),
@@ -57,25 +57,25 @@ impl YoutubeApi {
      * }
      * ```
      */
-    pub async fn login<H>(&self, handler: H) -> Result<(), Error>
+    pub async fn login<H>(&self, handler: H) -> crate::Result<()>
         where
             H: Fn(String) -> String,
     {
-        let oauth = self.oauth.as_ref().ok_or_else(|| format_err!("OAuth client not configured"))?;
+        let oauth = self.oauth.as_ref().ok_or_else(|| YoutubeError::OAuthClientNotConfigured)?;
         let token = perform_oauth(&oauth.client, handler).await?;
         oauth.token.set_token(token).await;
         Ok(())
     }
 
-    pub fn get_oauth_url(&self) -> Result<(String, String), Error> {
-        let oauth = self.oauth.as_ref().ok_or_else(|| format_err!("OAuth client not configured"))?;
+    pub fn get_oauth_url(&self) -> crate::Result<(String, String)> {
+        let oauth = self.oauth.as_ref().ok_or_else(|| YoutubeError::OAuthClientNotConfigured)?;
         let (url, verifier) = get_oauth_url(&oauth.client);
 
         Ok((url, verifier.secret().clone()))
     }
 
-    pub async fn request_token(&mut self, code: String, verifier: String) -> Result<(), Error> {
-        let oauth = self.oauth.as_ref().ok_or_else(|| format_err!("OAuth client not configured"))?;
+    pub async fn request_token(&mut self, code: String, verifier: String) -> crate::Result<()> {
+        let oauth = self.oauth.as_ref().ok_or_else(|| YoutubeError::OAuthClientNotConfigured)?;
         let verifier = PkceCodeVerifier::new(verifier);
 
         let token = request_token(&oauth.client, code, verifier).await?;
@@ -91,20 +91,22 @@ impl YoutubeApi {
     /**
      * Stores the auth and refresh token in a `.google-auth.json` file for login without user input.
      */
-    pub async fn store_token(&self) -> Result<(), Error> {
-        let oauth = self.oauth.as_ref().ok_or_else(|| format_err!("OAuth client not configured"))?;
-        ensure!(oauth.token.has_token(), "No token available to persist");
+    pub async fn store_token(&self) -> crate::Result<()> {
+        let oauth = self.oauth.as_ref().ok_or_else(|| YoutubeError::OAuthClientNotConfigured)?;
+        if !oauth.token.has_token() {
+            return Err(YoutubeError::NoTokenToPersist);
+        }
         let token = serde_json::to_string(&oauth.token.get_token().await?)?;
-        write(".youtube-auth.json", token).await?; // TODO: configure file path
+        write(".youtube-auth.json", token).await.map_err(|err| YoutubeError::AuthFileWriteError(err))?; // TODO: configure file path
         Ok(())
     }
 
     /**
      * Stores the auth and refresh token from a `.google-auth.json` file for login without user input.
      */
-    pub async fn load_token(&self) -> Result<(), Error> {
-        let oauth = self.oauth.as_ref().ok_or_else(|| format_err!("OAuth client not configured"))?;
-        let token = read_to_string(".youtube-auth.json").await?;
+    pub async fn load_token(&self) -> crate::Result<()> {
+        let oauth = self.oauth.as_ref().ok_or_else(|| YoutubeError::OAuthClientNotConfigured)?;
+        let token = read_to_string(".youtube-auth.json").await.map_err(|err| YoutubeError::AuthFileReadError(err))?;
         let token = serde_json::from_str(&token)?;
         oauth.token.set_token(token).await;
         Ok(())

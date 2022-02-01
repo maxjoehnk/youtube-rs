@@ -1,6 +1,5 @@
 use std::io;
 
-use failure::Error;
 use oauth2::basic::{BasicClient, BasicTokenResponse};
 use oauth2::reqwest::async_http_client;
 use oauth2::{
@@ -39,7 +38,7 @@ pub(crate) async fn request_token(
     client: &BasicClient,
     code: String,
     verifier: PkceCodeVerifier,
-) -> Result<BasicTokenResponse, Error> {
+) -> crate::Result<BasicTokenResponse> {
     let code = AuthorizationCode::new(code);
 
     let token = client
@@ -54,7 +53,7 @@ pub(crate) async fn request_token(
 pub(crate) async fn perform_oauth<H>(
     client: &BasicClient,
     handler: H,
-) -> Result<BasicTokenResponse, Error>
+) -> crate::Result<BasicTokenResponse>
 where
     H: Fn(String) -> String,
 {
